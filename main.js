@@ -20,18 +20,30 @@ angular
       $location.url(`/weather/${$scope.zip}`);
     }
   })
-  .controller('WeatherCtrl', function($http, $routeParams, $scope) {
-    console.log("I'm a weather controller")
-    $http.get(`http://api.wunderground.com/api/01e00dbf4c45c515/conditions/q/${$routeParams.zipcode}.json`)
-    .then((response)=> {
-      return  {
-        temp : response.data.current_observation.temp_f,
-        city : response.data.current_observation.display_location.full
-      }
+  .controller('WeatherCtrl', function($scope, $routeParams, weatherFactory) {
+    weatherFactory
+      .getWeather($routeParams.zipcode)
+      .then((weather) => {
+        $scope.temperature = weather.temp,
+        $scope.city = weather.city
+      })
 
-    }).then((weather) => {
-      $scope.temperature = weather.temp;
-      $scope.city = weather.city
-    })
+
+     })
+
+    .factory('weatherFactory', ($http) => {
+      return {
+        getWeather (zipcode) {
+          return $http
+          .get(`http://api.wunderground.com/api/01e00dbf4c45c515/conditions/q/${zipcode}.json`)
+            .then((response)=> {
+              return  {
+                temp : response.data.current_observation.temp_f,
+                  city : response.data.current_observation.display_location.full
+              }
+
+        })
+      }
+    }
 
   })
